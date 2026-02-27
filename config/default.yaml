@@ -1,0 +1,73 @@
+# KoVec — Full Configuration Reference
+# All values shown are defaults. Remove or comment out lines to use defaults.
+
+# === Global ===
+resolution: 512               # longest side resolution
+resolution_step: 64            # snap dims to multiples of this
+device: "cuda"
+
+# === SDS Simplification ===
+sds:
+  model_id: "runwayml/stable-diffusion-v1-5"   # HF model ID
+  model_type: "sd"              # "sd" | "sdxl"
+  prompt: " "                   # text prompt (space = unconditional)
+  num_iters: 80                 # SDS optimisation iterations
+  lr: 0.1                       # SDS learning rate
+  loss_scale: 2000.0            # SDS loss multiplier
+  guidance_scale: 0.0           # classifier-free guidance scale
+  t_min: 50                     # min diffusion timestep
+  t_max: 950                    # max diffusion timestep
+  alpha_exp: 0.0                # w(t) alpha exponent
+  sigma_exp: 0.0                # w(t) sigma exponent
+  simplification_indices: [80, 60, 40, 20, 0]  # snapshot iters for simplified sequence
+  dtype: "float16"              # "float32" | "float16"
+
+# === Segmentation ===
+# model_type options:
+#   sam  backend: vit_b, vit_l, vit_h
+#   sam2 backend: sam2_hiera_t.yaml, sam2_hiera_s.yaml, sam2_hiera_b+.yaml, sam2_hiera_l.yaml
+#                 sam2.1_hiera_t.yaml, sam2.1_hiera_s.yaml, sam2.1_hiera_b+.yaml, sam2.1_hiera_l.yaml
+segmentation:
+  backend: "sam"                # "sam" | "sam2"
+  checkpoint: null              # path to checkpoint (null = auto-download from HF)
+  model_type: "vit_l"
+  points_per_side: 64           # grid density for auto mask generation
+  pred_iou_thresh: 0.88         # predicted IoU threshold
+  stability_score_thresh: 0.95  # mask stability threshold
+  crop_n_layers: 0              # number of crop layers for multi-scale
+  crop_n_points_downscale_factor: 1
+  min_mask_region_area: 100     # min mask area in pixels
+  box_nms_thresh: 0.7           # NMS threshold for boxes
+
+# === Renderer ===
+renderer:
+  backend: "triton"             # "torch" | "triton"
+  samples_per_seg: 32           # polyline samples per Bezier segment
+  sigma: 1.0                    # anti-aliasing width (px)
+
+# === Training / Optimisation ===
+train:
+  struct_opt_num_iters: 50     # structural optimisation iterations
+  visual_opt_num_iters: 50     # visual optimisation iterations per round
+  is_train_stroke: true         # train stroke width
+  is_train_struct_color: true   # train colors during structural opt
+  is_train_visual_color: true   # train colors during visual opt
+
+# === Learning Rates ===
+lr:
+  point: 1.0                    # control point LR
+  color: 0.01                   # fill color LR
+  stroke_width: 0.1             # stroke width LR
+  stroke_color: 0.01            # stroke color LR
+
+# === Visual Refinement ===
+# Each round: find high-error regions → add paths_per_round paths → optimise all visual paths
+# Total visual paths ≈ num_rounds × paths_per_round
+refinement:
+  num_rounds: 5                 # number of add/opt rounds
+  paths_per_round: 64           # paths added per round from high-error regions
+  max_struct_paths: 256         # max structural paths kept from segmentation
+  approxpolydp_epsilon: 20.0     # Douglas-Peucker simplification tolerance
+  color_fitting_type: "dominan" # "dominan" (k-means dominant) | "mse"
+  is_cluster_target_img: false   # k-means cluster target before color fit
+  kmeans_k: 64                  # k-means clusters
