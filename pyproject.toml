@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kovec"
+version = "0.1.0"
+description = "Modular Layered Image Vectorization"
+authors = [
+    { name = "Shih-Ying Yeh(KohakuBlueLeaf)", email = "apolloyeh0123@gmail.com" },
+]
+license = { text = "Apache-2.0" }
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "torch>=2.0",
+    "torchvision",
+    "numpy",
+    "Pillow",
+    "opencv-python",
+    "pydantic>=2.0",
+    "pyyaml",
+    "scipy",
+    "tqdm",
+    "diffusers>=0.25",
+    "transformers",
+    "accelerate",
+]
+urls = { "Homepage" = "https://kblueleaf.net/KoVec" }
+
+[project.optional-dependencies]
+sam = ["segment-anything"]
+sam2 = ["sam2"]
+gradio = ["gradio>=4.0"]
+cli = ["click>=8.0"]
+dev = ["black", "ruff", "pytest"]
+all = ["kovec[sam,sam2,gradio,cli,dev]"]
+
+[project.scripts]
+kovec = "scripts.vectorize:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
