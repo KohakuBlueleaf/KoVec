@@ -23,41 +23,45 @@ class SDSConfig(BaseModel):
 
 
 class SegmentationConfig(BaseModel):
-    backend: Literal["sam", "sam2"] = "sam2"
+    backend: Literal["sam", "sam2"] = "sam"
     checkpoint: str | None = None
-    model_type: str = "sam2_hiera_l.yaml"
+    model_type: str = "vit_h"
     points_per_side: int = 32
-    pred_iou_thresh: float = 0.88
-    stability_score_thresh: float = 0.95
-    crop_n_layers: int = 0
-    crop_n_points_downscale_factor: int = 1
+    pred_iou_thresh: float = 0.86
+    stability_score_thresh: float = 0.85
+    crop_n_layers: int = 1
+    crop_n_points_downscale_factor: int = 2
     min_mask_region_area: int = 100
     box_nms_thresh: float = 0.7
 
 
 class TrainConfig(BaseModel):
-    struct_opt_num_iters: int = 200
-    visual_opt_num_iters: int = 200
-    is_train_stroke: bool = True
+    struct_opt_num_iters: int = 50
+    visual_opt_num_iters: int = 100
+    is_train_stroke: bool = False
     is_train_struct_color: bool = True
     is_train_visual_color: bool = True
 
 
 class LRConfig(BaseModel):
     point: float = 1.0
-    color: float = 0.05
-    stroke_width: float = 0.2
-    stroke_color: float = 0.05
+    color: float = 0.01
+    stroke_width: float = 0.1
+    stroke_color: float = 0.01
 
 
 class RefinementConfig(BaseModel):
-    num_rounds: int = 6
-    paths_per_round: int = 64
-    max_struct_paths: int = 200
+    num_rounds: int = 5
+    max_path_limit: int = 256
+    max_struct_paths: int = 102
     approxpolydp_epsilon: float = 5.0
     color_fitting_type: Literal["dominan", "mse"] = "dominan"
     is_cluster_target_img: bool = True
-    kmeans_k: int = 32
+    kmeans_k: int = 80
+    paths_remove_threshold: float = 7.0
+    paths_merge_color_threshold: float = 0.1
+    paths_merge_overlap_threshold: int = 3
+    merge_opt_num_iters: int = 50
 
 
 class RendererConfig(BaseModel):

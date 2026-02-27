@@ -99,7 +99,11 @@ def mask_to_path(mask: np.ndarray, epsilon: float = 5.0) -> VectorPath:
         )
 
     contour = contours[0]
-    simplified = cv2.approxPolyDP(contour, epsilon, closed=True)
+    # Scale epsilon relative to contour size so small masks keep their shape
+    bbox = cv2.boundingRect(contour)
+    bbox_size = max(bbox[2], bbox[3])
+    adaptive_eps = min(epsilon, bbox_size * 0.1)
+    simplified = cv2.approxPolyDP(contour, adaptive_eps, closed=True)
 
     # Ensure at least 3 anchor points
     if len(simplified) == 1:

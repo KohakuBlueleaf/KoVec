@@ -30,12 +30,12 @@ sds:
 segmentation:
   backend: "sam"                # "sam" | "sam2"
   checkpoint: null              # path to checkpoint (null = auto-download from HF)
-  model_type: "vit_l"
-  points_per_side: 64           # grid density for auto mask generation
-  pred_iou_thresh: 0.88         # predicted IoU threshold
-  stability_score_thresh: 0.95  # mask stability threshold
-  crop_n_layers: 0              # number of crop layers for multi-scale
-  crop_n_points_downscale_factor: 1
+  model_type: "vit_h"
+  points_per_side: 32           # grid density for auto mask generation
+  pred_iou_thresh: 0.86         # predicted IoU threshold
+  stability_score_thresh: 0.85  # mask stability threshold
+  crop_n_layers: 1              # number of crop layers for multi-scale
+  crop_n_points_downscale_factor: 2
   min_mask_region_area: 100     # min mask area in pixels
   box_nms_thresh: 0.7           # NMS threshold for boxes
 
@@ -48,8 +48,8 @@ renderer:
 # === Training / Optimisation ===
 train:
   struct_opt_num_iters: 50     # structural optimisation iterations
-  visual_opt_num_iters: 50     # visual optimisation iterations per round
-  is_train_stroke: true         # train stroke width
+  visual_opt_num_iters: 100    # visual optimisation iterations per round
+  is_train_stroke: false        # train stroke width
   is_train_struct_color: true   # train colors during structural opt
   is_train_visual_color: true   # train colors during visual opt
 
@@ -61,13 +61,17 @@ lr:
   stroke_color: 0.01            # stroke color LR
 
 # === Visual Refinement ===
-# Each round: find high-error regions → add paths_per_round paths → optimise all visual paths
-# Total visual paths ≈ num_rounds × paths_per_round
+# Each round: add paths → optimise → remove low-quality → merge similar → optimise
+# Last round skips remove/merge.  N per round = 60% of remaining capacity.
 refinement:
   num_rounds: 5                 # number of add/opt rounds
-  paths_per_round: 64           # paths added per round from high-error regions
-  max_struct_paths: 256         # max structural paths kept from segmentation
-  approxpolydp_epsilon: 20.0     # Douglas-Peucker simplification tolerance
+  max_path_limit: 256           # total max paths (struct + visual)
+  max_struct_paths: 102         # max structural paths kept from segmentation
+  approxpolydp_epsilon: 5.0     # Douglas-Peucker simplification tolerance
   color_fitting_type: "dominan" # "dominan" (k-means dominant) | "mse"
-  is_cluster_target_img: false   # k-means cluster target before color fit
-  kmeans_k: 64                  # k-means clusters
+  is_cluster_target_img: true   # k-means cluster target before color fit
+  kmeans_k: 80                  # k-means clusters
+  paths_remove_threshold: 7.0   # L1 pixel diff threshold for path removal
+  paths_merge_color_threshold: 0.1   # max L1 color diff to merge paths
+  paths_merge_overlap_threshold: 3   # min overlapping pixels to merge
+  merge_opt_num_iters: 50       # optimisation iters after merge step

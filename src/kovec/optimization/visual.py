@@ -35,7 +35,7 @@ def optimize_visual(
         {"params": params[k], "lr": getattr(config.lr, k), "_id": k}
         for k in sorted(params)
     ]
-    optimizer = torch.optim.Adam(lr_groups, betas=(0.5, 0.95), eps=1e-6)
+    optimizer = torch.optim.Adam(lr_groups, betas=(0.9, 0.9), eps=1e-6)
 
     iters = num_iters if num_iters is not None else config.train.visual_opt_num_iters
 

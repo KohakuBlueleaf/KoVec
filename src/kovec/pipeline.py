@@ -155,6 +155,7 @@ class KoVecPipeline:
             scene,
             self.renderer,
             target_img,
+            target_clustered,
             layered,
             config,
             output_dir=output_dir,

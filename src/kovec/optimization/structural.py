@@ -100,7 +100,7 @@ def optimize_structural(
         {"params": params[k], "lr": getattr(config.lr, k), "_id": k}
         for k in sorted(params)
     ]
-    optimizer = torch.optim.Adam(lr_groups, betas=(0.5, 0.95), eps=1e-6)
+    optimizer = torch.optim.Adam(lr_groups, betas=(0.9, 0.9), eps=1e-6)
 
     shape_idx = 0
     layer_ranges: list[tuple[int, int]] = []
